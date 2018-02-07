@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>TODO supply a title</title>
+        <title>ONE / Bruit Blanc</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
@@ -27,7 +27,7 @@
                 R: 0,
                 G: 0,
                 B: 0,
-                A: .8
+                A: .4
             };
 
             function newRandom(min, max) {
@@ -44,9 +44,9 @@
                 box.y = newRandom(0, 1080);
                 box.sizeX = newRandom(50, 80);
                 box.sizeY = newRandom(50, 80);
-                box.R = newRandom(0, 200);
-                box.G = newRandom(0, 200);
-                box.B = newRandom(0, 200);
+                box.R = 255;
+                box.G = 255;
+                box.B = 255;
             }
 
             function loop() {
