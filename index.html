@@ -14,47 +14,62 @@
         </style>
     </head>
     <body>
+        <canvas id="canvas"></canvas>
         <script>
             // https://stackoverflow.com/questions/22003491/animating-canvas-to-look-like-tv-noise
-            function generateNoise(opacity, h, w) {
-                function makeCanvas(h, w) {
-                    var canvas = document.createElement('canvas');
-                    canvas.height = h;
-                    canvas.width = w;
-                    return canvas;
-                }
+            var canvas = document.getElementById('canvas'),
+                    ctx = canvas.getContext('2d');
 
-                function randomise(data, opacity) {
-                    var i, x;
-                    for (i = 0; i < data.length; i = i + 4) {
-                        x = Math.floor(Math.random() * 0xffffff);
-                        data[i    ] = x & 0xff;
-                        data[i + 1] = (x & 0xff00) >>> 8;
-                        data[i + 2] = (x & 0xff0000) >>> 16;
-                        data[i + 3] = opacity;
-                    }
-                }
+// closer to analouge appearance
+            canvas.width = canvas.height = 256;
 
-                function initialise(opacity, h, w) {
-                    var canvas = makeCanvas(h, w),
-                            context = canvas.getContext('2d'),
-                            image = context.createImageData(h, w);
-                    opacity = Math.floor((opacity || 0.2) * 0x255);
-                    return function () {
-                        randomise(image.data, opacity);
-                        context.putImageData(image, 0, 0);
-                        // you may want to consider other ways of setting the canvas
-                        // as the background so you can take this out of the loop, too
-                        document.body.style.backgroundImage = "url(" + canvas.toDataURL("image/png") + ")";
-                    };
-                }
-
-                return initialise(opacity, h || 55, w || 55);
+            function resize() {
+                canvas.style.width = window.innerWidth + 'px';
+                canvas.style.height = window.innerHeight + 'px';
             }
-            noise = generateNoise(.8, 200, 200);
+            resize();
+            window.onresize = resize;
 
+            function noise(ctx) {
+
+                var w = ctx.canvas.width,
+                        h = ctx.canvas.height,
+                        idata = ctx.createImageData(w, h),
+                        buffer32 = new Uint32Array(idata.data.buffer),
+                        len = buffer32.length,
+                        run = 0,
+                        color = 0,
+                        m = Math.random() * 6 + 4,
+                        band = Math.random() * 256 * 256,
+                        p = 0,
+                        i = 0;
+
+                for (; i < len; ) {
+                    if (run < 0) {
+                        run = m * Math.random();
+                        p = Math.pow(Math.random(), 0.4);
+                        if (i > band && i < band + 48 * 256) {
+                            p = Math.random();
+                        }
+                        color = (255 * p) << 24;
+                    }
+                    run -= 1;
+                    buffer32[i++] = color;
+                }
+
+                ctx.putImageData(idata, 0, 0);
+            }
+
+            var frame = 0;
+
+// added toggle to get 30 FPS instead of 60 FPS
             (function loop() {
-                noise();
+                frame += 1;
+                if (frame % 3) {
+                    requestAnimationFrame(loop);
+                    return;
+                }
+                noise(ctx);
                 requestAnimationFrame(loop);
             })();
 
