@@ -10,39 +10,28 @@
                 margin:0;
                 padding:0;
             }
-
+            #c {background:#000}
         </style>
     </head>
     <body>
-        <canvas id="tv" width="1920" height="1080"></canvas>
+        <canvas id="c" width="1920" height="1080"></canvas>
         <script>
             // https://stackoverflow.com/questions/22003491/animating-canvas-to-look-like-tv-noise
-            var canvas = null;
-            var context = null;
-            var time = 0;
-            var intervalId = 0;
+            var ctx = c.getContext("2d", {alpha: false});       // context without alpha channel.
+            var idata = ctx.createImageData(c.width, c.height); // create image data
+            var buffer32 = new Uint32Array(idata.data.buffer);  // get 32-bit view
 
-            var makeNoise = function () {
-                var imgd = context.createImageData(canvas.width, canvas.height);
-                var pix = imgd.data;
+            (function loop() {
+                noise(ctx);
+                requestAnimationFrame(loop)
+            })()
 
-                for (var i = 0, n = pix.length; i < n; i += 4) {
-                    var c = 7 + Math.sin(i / 50000 + time / 7); // A sine wave of the form sin(ax + bt)
-                    pix[i] = pix[i + 1] = pix[i + 2] = 40 * Math.random() * c; // Set a random gray
-                    pix[i + 3] = 255; // 100% opaque
-                }
-
-                context.putImageData(imgd, 0, 0);
-                time = (time + 1) % canvas.height;
+            function noise(ctx) {
+                var len = buffer32.length - 1;
+                while (len--)
+                    buffer32[len] = Math.random() < 0.5 ? 0 : -1 >> 0;
+                ctx.putImageData(idata, 0, 0);
             }
-
-            var setup = function () {
-                canvas = document.getElementById("tv");
-                context = canvas.getContext("2d");
-            }
-
-            setup();
-            intervalId = setInterval(makeNoise, 50);
         </script>
     </body>
 </html>
