@@ -14,47 +14,48 @@
         </style>
     </head>
     <body>
-        <canvas id="canvas"></canvas>
+        <canvas id="myCanvas" height="1080" width="1920"></canvas>
         <script>
-            // https://stackoverflow.com/questions/22003491/animating-canvas-to-look-like-tv-noise
-            var canvas = document.getElementById('canvas'),
-                    ctx = canvas.getContext('2d');
+            // https://codepen.io/Johnesco/pen/oXvdNg
+            var canvas = document.getElementById('myCanvas');
+            var context = canvas.getContext('2d');
+            var box = {
+                x: 0,
+                y: 0,
+                sizeX: 0,
+                sizeY: 0,
+                R: 0,
+                G: 0,
+                B: 0,
+                A: .8
+            };
 
-            function resize() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            }
-            resize();
-            window.onresize = resize;
-
-            function noise(ctx) {
-
-                var w = ctx.canvas.width,
-                        h = ctx.canvas.height,
-                        idata = ctx.createImageData(w, h),
-                        buffer32 = new Uint32Array(idata.data.buffer),
-                        len = buffer32.length,
-                        i = 0;
-
-                for (; i < len; )
-                    buffer32[i++] = ((255 * Math.random()) | 0) << 24;
-
-                ctx.putImageData(idata, 0, 0);
+            function newRandom(min, max) {
+                return Math.floor(Math.random() * (min - max) + max);
             }
 
-            var toggle = true;
+            function draw() {
+                context.fillStyle = 'rgba(' + box.R + ',' + box.G + ',' + box.B + ',' + box.A + ')';
+                context.fillRect(box.x, box.y, box.sizeX, box.sizeY);
+            }
 
-// added toggle to get 30 FPS instead of 60 FPS
-            (function loop() {
-                toggle = !toggle;
-                if (toggle) {
-                    requestAnimationFrame(loop);
-                    return;
-                }
-                noise(ctx);
-                requestAnimationFrame(loop);
-            })();
+            function update() {
+                box.x = newRandom(0, 1920);
+                box.y = newRandom(0, 1080);
+                box.sizeX = newRandom(50, 80);
+                box.sizeY = newRandom(50, 80);
+                box.R = newRandom(0, 200);
+                box.G = newRandom(0, 200);
+                box.B = newRandom(0, 200);
+            }
 
+            function loop() {
+                update();
+                draw();
+                window.requestAnimationFrame(loop);
+            }
+
+            loop();
         </script>
     </body>
 </html>
